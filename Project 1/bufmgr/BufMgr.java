@@ -28,7 +28,8 @@ import java.util.HashMap;
  */
 @SuppressWarnings("unused")
 public class BufMgr implements GlobalConst {
-	protected bufferPool bufPool;
+	protected FrameDesc[] bufPool;
+	protected HashMap<Integer, FrameDesc> bufMap;
 
 	/**
 	 * Constructs a buffer manager by initializing member data.
@@ -37,7 +38,8 @@ public class BufMgr implements GlobalConst {
 	 *            number of frames in the buffer pool
 	 */
 	public BufMgr(int numframes) {
-		bufPool = new bufferPool(numframes);
+		bufPool = new FrameDesc[numframes];
+		bufMap = new HashMap<Integer, FrameDesc>();
 		
 		//throw new UnsupportedOperationException("Not implemented");
 	} // public BufMgr(int numframes)
@@ -97,7 +99,7 @@ public class BufMgr implements GlobalConst {
 	 *             if the page is not in the buffer pool or not pinned
 	 */
 	public void unpinPage(PageId pageno, boolean dirty) {
-		if(!bufPool.contains(pageno)) {
+		if(true) {
 			throw new UnsupportedOperationException("Page: " + pageno + " not found");
 		}
 		throw new UnsupportedOperationException("Not implemented");
