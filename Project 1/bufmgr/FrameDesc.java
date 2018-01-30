@@ -16,4 +16,12 @@ class FrameDesc {
 		pinCount = 0;
 		page = null;
 	}
+
+    public FrameDesc(boolean dirty, boolean valid, PageId pageNo, int pinCount, Page page) {
+        this.dirty = dirty;
+        this.valid = valid;
+        this.pageNo = pageNo
+        this.pinCount = pinCount;
+        this.page = page;
+    }
 }
