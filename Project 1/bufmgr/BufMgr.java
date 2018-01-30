@@ -12,20 +12,6 @@ import global.PageId;
 
 import java.util.HashMap;
 
-class FrameDesc {
-	boolean dirty;
-	boolean valid;
-	PageId pageNo;
-	int pinCount;
-	
-	public FrameDesc() {
-		dirty = false;
-		valid = false;
-		pageNo = new PageId(); //INVALID_PAGEID
-		pinCount = 0;
-	}
-}
-
 /**
  * <h3>Minibase Buffer Manager</h3> The buffer manager manages an array of main
  * memory pages. The array is called the buffer pool, each page is called a
@@ -42,8 +28,7 @@ class FrameDesc {
  */
 @SuppressWarnings("unused")
 public class BufMgr implements GlobalConst {
-	protected FrameDesc[] bufPool;
-	protected HashMap<PageId, FrameDesc> bufMap;
+	protected bufferPool bufPool;
 
 	/**
 	 * Constructs a buffer manager by initializing member data.
@@ -52,8 +37,7 @@ public class BufMgr implements GlobalConst {
 	 *            number of frames in the buffer pool
 	 */
 	public BufMgr(int numframes) {
-		bufPool = new FrameDesc[numframes];
-		bufMap = new HashMap<PageId, FrameDesc>();
+		bufPool = new bufferPool(numframes);
 		
 		//throw new UnsupportedOperationException("Not implemented");
 	} // public BufMgr(int numframes)
@@ -113,7 +97,9 @@ public class BufMgr implements GlobalConst {
 	 *             if the page is not in the buffer pool or not pinned
 	 */
 	public void unpinPage(PageId pageno, boolean dirty) {
-
+		if(!bufPool.contains(pageno)) {
+			throw new UnsupportedOperationException("Page: " + pageno + " not found");
+		}
 		throw new UnsupportedOperationException("Not implemented");
 
 	} // public void unpinPage(PageId pageno, boolean dirty)
