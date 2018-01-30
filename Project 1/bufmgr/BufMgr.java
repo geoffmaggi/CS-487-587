@@ -130,8 +130,8 @@ public class BufMgr implements GlobalConst {
 	  }
 		
 		PageId pid = diskMgr.allocate_page(run_size);
-	  if(bufMap.containsKey(pid)) {
-	  	throw new IllegalArgumentException("firstpg(" + pid + ") is already pinned");
+	  if(bufMap.containsKey(pid) && bufMap.get(pid).pinCount > 0) {
+  		throw new IllegalArgumentException("firstpg(" + pid + ") is already pinned");
 	  }
 	  pinPage(pid, firstpg, PIN_MEMCPY);
 	  return pid;
@@ -148,9 +148,18 @@ public class BufMgr implements GlobalConst {
 	 *             if the page is pinned
 	 */
 	public void freePage(PageId pageno) {
-
-		throw new UnsupportedOperationException("Not implemented");
-
+		if(!bufMap.containsKey(pageno)) {
+			throw new IllegalArgumentException(pageno + " is not in memory");
+		}
+		if(bufMap.get(pageno).pinCount > 0) {
+  		throw new IllegalArgumentException( pageno + " is pinned");
+	  }
+		
+	  bufMap.get(pageno).valid = false;
+		bufMap.remove(pageno);
+		
+		diskMgr.deallocate_page(pageno);
+		//throw new UnsupportedOperationException("Not implemented");
 	} // public void freePage(PageId firstid)
 
 	/**
