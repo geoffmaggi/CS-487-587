@@ -180,9 +180,14 @@ public class BufMgr implements GlobalConst {
 	 *             if the page is not in the buffer pool
 	 */
 	public void flushPage(PageId pageno) {
-
-		throw new UnsupportedOperationException("Not implemented");
-
+		if(!bufMap.containsKey(pageno)) {
+			throw new IllegalArgumentException(pageno + " is not in memory");
+		}
+		if(bufMap.get(pageno).dirty) {
+			diskMgr.write_page(pageno, bufMap.get(pageno).page);
+			//Should we flip the dirty bit?
+		}
+		//throw new UnsupportedOperationException("Not implemented");
 	}
 
 	/**
