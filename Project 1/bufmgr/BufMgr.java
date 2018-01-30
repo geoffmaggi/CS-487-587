@@ -1,3 +1,8 @@
+/* Minibase Implementation for CS 487/587
+ * Docs: http://pages.cs.wisc.edu/~dbbook/openAccess/Minibase/minibase.html
+ * Authors: Alexander Goddard & Geoff Maggi
+ */
+
 package bufmgr;
 
 import global.GlobalConst;
@@ -6,6 +11,20 @@ import global.Page;
 import global.PageId;
 
 import java.util.HashMap;
+
+class FrameDesc {
+	boolean dirty;
+	boolean valid;
+	PageId pageNo;
+	int pinCount;
+	
+	public FrameDesc() {
+		dirty = false;
+		valid = false;
+		pageNo = new PageId(); //INVALID_PAGEID
+		pinCount = 0;
+	}
+}
 
 /**
  * <h3>Minibase Buffer Manager</h3> The buffer manager manages an array of main
@@ -21,7 +40,10 @@ import java.util.HashMap;
  * The buffer manager is used by access methods, heap files, and relational
  * operators.
  */
+@SuppressWarnings("unused")
 public class BufMgr implements GlobalConst {
+	protected FrameDesc[] bufPool;
+	protected HashMap<PageId, FrameDesc> bufMap;
 
 	/**
 	 * Constructs a buffer manager by initializing member data.
@@ -30,9 +52,10 @@ public class BufMgr implements GlobalConst {
 	 *            number of frames in the buffer pool
 	 */
 	public BufMgr(int numframes) {
-
-		throw new UnsupportedOperationException("Not implemented");
-
+		bufPool = new FrameDesc[numframes];
+		bufMap = new HashMap<PageId, FrameDesc>();
+		
+		//throw new UnsupportedOperationException("Not implemented");
 	} // public BufMgr(int numframes)
 
 	/**
