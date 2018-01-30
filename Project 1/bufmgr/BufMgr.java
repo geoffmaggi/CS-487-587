@@ -5,6 +5,7 @@
 
 package bufmgr;
 
+import diskmgr.DiskMgr;
 import global.GlobalConst;
 import global.Minibase;
 import global.Page;
@@ -29,7 +30,8 @@ import java.util.HashMap;
 @SuppressWarnings("unused")
 public class BufMgr implements GlobalConst {
 	protected FrameDesc[] bufPool;
-	protected HashMap<Integer, FrameDesc> bufMap;
+	protected HashMap<PageId, FrameDesc> bufMap;
+	protected DiskMgr diskMgr;
 
 	/**
 	 * Constructs a buffer manager by initializing member data.
@@ -39,7 +41,8 @@ public class BufMgr implements GlobalConst {
 	 */
 	public BufMgr(int numframes) {
 		bufPool = new FrameDesc[numframes];
-		bufMap = new HashMap<Integer, FrameDesc>();
+		bufMap = new HashMap<PageId, FrameDesc>();
+		diskMgr = new DiskMgr();
 		
 		//throw new UnsupportedOperationException("Not implemented");
 	} // public BufMgr(int numframes)
@@ -122,9 +125,18 @@ public class BufMgr implements GlobalConst {
 	 *             if all pages are pinned (i.e. pool exceeded)
 	 */
 	public PageId newPage(Page firstpg, int run_size) {
-
-		throw new UnsupportedOperationException("Not implemented");
-
+		if(getNumUnpinned() == 0) {
+	  	throw new IllegalStateException("All pages are pinned");
+	  }
+		
+		PageId pid = diskMgr.allocate_page(run_size);
+	  if(bufMap.containsKey(pid)) {
+	  	throw new IllegalArgumentException("firstpg(" + pid + ") is already pinned");
+	  }
+	  pinPage(pid, firstpg, PIN_MEMCPY);
+	  return pid;
+    
+		//throw new UnsupportedOperationException("Not implemented");
 	} // public PageId newPage(Page firstpg, int run_size)
 
 	/**
