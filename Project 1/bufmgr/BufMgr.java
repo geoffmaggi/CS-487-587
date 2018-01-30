@@ -86,8 +86,29 @@ public class BufMgr implements GlobalConst {
 	 *             if all pages are pinned (i.e. pool is full)
 	 */
 	public void pinPage(PageId pageno, Page mempage, int contents) {
+	    if(this.getNumUnpinned() == 0) {
+	        throw new IllegalStateException("The buffer pool is full")
+        }
+	    int frameno = 0; // replPolicy.pickVictim();
+        if (this.bufMap.containsKey(this.bufPool[framno].pageno)) {
+            this.bufMap.remove(this.bufPool[framno].pageno);
+        }
+        switch(contents) {
+            case PIN_DISKIO:
+                this.diskMgr.read_page(pageno, mempage);
+                this.bufPool[frameno] = FrameDesc(false, true, pageno, 1, mempage);
+                this.bufMap.put(pageno, this.bufPool[frameno]);
 
-		throw new UnsupportedOperationException("Not implemented");
+            case PIN_MEMCPY:
+                if(this.bufMap.containsKey(pageno) && this.bufMap.get(pageno).pinCount > 0) {
+                    throw new IllegalArgumentException("Page: " + pageno + " is pinned.");
+                }
+                this.bufPool[frameno] = FrameDesc(false, true, pageno, 1, mempage);
+                this.bufMap.put(pageno, this.bufPool[frameno]);
+
+            case PIN_NOOP:
+                this.bufPool[frameno].pinCount += 1;
+        }
 
 	} // public void pinPage(PageId pageno, Page page, int contents)
 
@@ -102,10 +123,13 @@ public class BufMgr implements GlobalConst {
 	 *             if the page is not in the buffer pool or not pinned
 	 */
 	public void unpinPage(PageId pageno, boolean dirty) {
-		if(true) {
+		if(!this.bufMap.containsKey(pageno)) {
 			throw new UnsupportedOperationException("Page: " + pageno + " not found");
 		}
-		throw new UnsupportedOperationException("Not implemented");
+		if(!this.bufMap.containsKey(pageno) || this.bufMap.get(pageno).pinCount == 0) {
+		    throw new IllegalArgumentException("Page: " + pageno + " is not pinned")
+        }
+		this.bufMap.get(pageno).pinCount -= 1;
 
 	} // public void unpinPage(PageId pageno, boolean dirty)
 
