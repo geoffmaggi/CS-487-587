@@ -20,7 +20,7 @@ class FrameDesc {
     public FrameDesc(boolean dirty, boolean valid, PageId pageNo, int pinCount, Page page) {
         this.dirty = dirty;
         this.valid = valid;
-        this.pageNo = pageNo
+        this.pageNo = pageNo;
         this.pinCount = pinCount;
         this.page = page;
     }

@@ -87,23 +87,23 @@ public class BufMgr implements GlobalConst {
 	 */
 	public void pinPage(PageId pageno, Page mempage, int contents) {
 	    if(this.getNumUnpinned() == 0) {
-	        throw new IllegalStateException("The buffer pool is full")
+	        throw new IllegalStateException("The buffer pool is full");
         }
 	    int frameno = 0; // replPolicy.pickVictim();
-        if (this.bufMap.containsKey(this.bufPool[framno].pageno)) {
-            this.bufMap.remove(this.bufPool[framno].pageno);
+        if (this.bufMap.containsKey(this.bufPool[frameno].pageNo)) {
+            this.bufMap.remove(this.bufPool[frameno].pageNo);
         }
         switch(contents) {
             case PIN_DISKIO:
                 this.diskMgr.read_page(pageno, mempage);
-                this.bufPool[frameno] = FrameDesc(false, true, pageno, 1, mempage);
+                this.bufPool[frameno] = new FrameDesc(false, true, pageno, 1, mempage);
                 this.bufMap.put(pageno, this.bufPool[frameno]);
 
             case PIN_MEMCPY:
                 if(this.bufMap.containsKey(pageno) && this.bufMap.get(pageno).pinCount > 0) {
                     throw new IllegalArgumentException("Page: " + pageno + " is pinned.");
                 }
-                this.bufPool[frameno] = FrameDesc(false, true, pageno, 1, mempage);
+                this.bufPool[frameno] = new FrameDesc(false, true, pageno, 1, mempage);
                 this.bufMap.put(pageno, this.bufPool[frameno]);
 
             case PIN_NOOP:
@@ -127,7 +127,7 @@ public class BufMgr implements GlobalConst {
 			throw new UnsupportedOperationException("Page: " + pageno + " not found");
 		}
 		if(!this.bufMap.containsKey(pageno) || this.bufMap.get(pageno).pinCount == 0) {
-		    throw new IllegalArgumentException("Page: " + pageno + " is not pinned")
+		    throw new IllegalArgumentException("Page: " + pageno + " is not pinned");
         }
 		this.bufMap.get(pageno).pinCount -= 1;
 
