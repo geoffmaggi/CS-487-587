@@ -87,7 +87,7 @@ public class BufMgr implements GlobalConst {
 	 *           if all pages are pinned (i.e. pool is full)
 	 */
 	public void pinPage(PageId pageno, Page mempage, int contents) {
-		if(bufMap.containsKey(pageno.pid) && bufMap.get(pageno.pid).valid) {
+		if(bufMap.containsKey(pageno.pid) && bufMap.get(pageno.pid).valid()) {
 			bufMap.get(pageno.pid).pinCount++;
 			return;
 		}
@@ -98,7 +98,7 @@ public class BufMgr implements GlobalConst {
 		
 		int frameno = replPolicy.pickVictim(bufPool);
 		
-		if(bufPool[frameno].valid && bufPool[frameno].dirty) {
+		if(bufPool[frameno].valid() && bufPool[frameno].dirty) {
 			flushPage(bufPool[frameno].pageNo);
 		}
 		
@@ -109,7 +109,7 @@ public class BufMgr implements GlobalConst {
 		switch (contents) {
 			case PIN_DISKIO:
 				Minibase.DiskManager.read_page(pageno, mempage);
-				bufPool[frameno] = new FrameDesc(false, true, pageno.pid, 1, mempage);
+				bufPool[frameno] = new FrameDesc(false, true, pageno, 1, mempage);
 				bufMap.put(pageno.pid, bufPool[frameno]);
 				
 				data = Convert.getIntValue(0, mempage.getData());
@@ -118,11 +118,11 @@ public class BufMgr implements GlobalConst {
 				if (this.bufMap.containsKey(pageno.pid) && this.bufMap.get(pageno.pid).pinCount > 0) {
 					throw new IllegalArgumentException("Page: " + pageno + " is pinned.");
 				}
-				this.bufPool[frameno] = new FrameDesc(false, true, pageno.pid, 1, mempage);
+				this.bufPool[frameno] = new FrameDesc(false, true, pageno, 1, mempage);
 				this.bufMap.put(pageno.pid, this.bufPool[frameno]);
 				break;
 			case PIN_NOOP:
-				this.bufPool[frameno] = new FrameDesc(false, true, pageno.pid, 1, mempage);
+				this.bufPool[frameno] = new FrameDesc(false, true, pageno, 1, mempage);
 				this.bufMap.put(pageno.pid, this.bufPool[frameno]);
 				break;
 		}
