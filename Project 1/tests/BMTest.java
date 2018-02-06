@@ -27,8 +27,8 @@ class BMTest extends TestDriver {
 		System.out.println("\n" + "Running " + TEST_NAME + "...");
 		boolean status = PASS;
 		status &= bmt.test1();
-		//status &= bmt.test2();
-		//status &= bmt.test3();
+		status &= bmt.test2();
+		status &= bmt.test3();
 
 		// display the final results
 		System.out.println();
