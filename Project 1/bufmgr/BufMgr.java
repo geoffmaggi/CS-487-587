@@ -126,12 +126,12 @@ public class BufMgr implements GlobalConst {
 	 * 
 	 * @param pageno
 	 *          identifies the page to unpin
-	 * @param forceDirty (Changed from original specs)
-	 *          if true sets dirty to true, otherwise does nothing
+	 * @param dirty (Changed from original specs)
+	 *          if true for any unpin set dirty to true
 	 * @throws IllegalArgumentException
 	 *           if the page is not in the buffer pool or not pinned
 	 */
-	public void unpinPage(PageId pageno, boolean forceDirty) {
+	public void unpinPage(PageId pageno, boolean dirty) {
 		if (!bufMap.containsKey(pageno)) {
 			throw new IllegalArgumentException("Page: " + pageno + " not found");
 		}
@@ -139,10 +139,7 @@ public class BufMgr implements GlobalConst {
 			throw new IllegalArgumentException("Page: " + pageno + " is not pinned");
 		}
 		
-		if(forceDirty == true) {
-			bufMap.get(pageno).dirty = true;
-		}
-		//bufMap.get(pageno).dirty = dirty;
+		bufMap.get(pageno).dirty |= dirty;
 		bufMap.get(pageno).pinCount--;
 	}
 
