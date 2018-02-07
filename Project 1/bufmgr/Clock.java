@@ -1,5 +1,13 @@
+/* Minibase Implementation for CS 487/587
+ * Docs: http://pages.cs.wisc.edu/~dbbook/openAccess/Minibase/minibase.html
+ * Authors: Alexander Goddard & Geoff Maggi
+ */
+
 package bufmgr;
 
+/**
+ * Implements the second change clock algorithm
+ */
 class Clock {
 	int current;
 	
@@ -8,20 +16,6 @@ class Clock {
 	}
 	
 	public int pickVictim(FrameDesc[] bufPool) {
-		/*
-		 for(int counter = 0; counter < N*2; counter++) {
-			if data in bufpool[current] is not valid, choose current;
-			if frametab[current]'s pin count is 0 {
-				if frametab [current] has refbit == true {
-					set frametab [current]'s refbit = false
-				} else {
-					return current
-				}
-			}
-			increment current, mod N
-		}
-		We couldn't find an available frame, so return an error
-		*/
 		int N = bufPool.length;
 		for(int counter = 0; counter < N*2; counter++) {
 			if(!bufPool[current].valid) return current;
