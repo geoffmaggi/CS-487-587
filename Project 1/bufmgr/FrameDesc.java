@@ -1,35 +1,21 @@
 package bufmgr;
 
-import global.*;
+import global.PageId;
 
-class FrameDesc {
-	boolean dirty;
-	boolean valid;
-	boolean refbit;
-	PageId pageNo;
-	int pinCount;
-	Page page;
+public class FrameDesc {
+    public boolean dirty;
+    public boolean valid;
+    public boolean refBit;
+    public PageId pageNo;
+    public int pinCount;
+    public int index;
 
-	public FrameDesc() {
-		dirty = false;
-		valid = false;
-		refbit = false;
-		pageNo = new PageId(); // INVALID_PAGEID
-		pinCount = 0;
-		page = null;
-	}
-
-	public FrameDesc(boolean dirty, boolean valid, PageId pageNo, int pinCount, Page page) {
-		this.dirty = dirty;
-		this.valid = valid;
-		this.refbit = true;
-		this.pageNo = pageNo;
-		this.pinCount = pinCount;
-		this.page = page;
-	}
-	
-	public boolean valid() {
-		if(!valid || pinCount<1) return false;
-		return true;
-	}
+    public FrameDesc(int index) {
+        dirty = false;
+        valid = false;
+        refBit = false;
+        pageNo = new PageId();
+        pinCount = 0;
+        this.index = index;
+    }
 }

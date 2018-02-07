@@ -1,13 +1,13 @@
 package bufmgr;
 
 class Clock {
-	int current;
-	
-	public Clock() {
-			current = 0;
-	}
-	
-	public int pickVictim(FrameDesc[] bufPool) {
+    int current;
+
+    public Clock() {
+        current = 0;
+    }
+
+    public int pickVictim(FrameDesc[] frameTab) {
 		/*
 		 for(int counter = 0; counter < N*2; counter++) {
 			if data in bufpool[current] is not valid, choose current;
@@ -22,15 +22,15 @@ class Clock {
 		}
 		We couldn't find an available frame, so return an error
 		*/
-		int N = bufPool.length;
-		for(int counter = 0; counter < N*2; counter++) {
-			if(!bufPool[current].valid) return current;
-			if(bufPool[current].pinCount < 1) {
-				if(bufPool[current].refbit) bufPool[current].refbit = false;
-				else return current;
-			}
-			current = (current + 1) % N;
-		}
-		throw new IllegalStateException("No victim found.");
-	}
+        int N = frameTab.length;
+        for(int counter = 0; counter < N*2; counter++) {
+            if(!frameTab[current].valid) return current;
+            if(frameTab[current].pinCount < 1) {
+                if(frameTab[current].refBit) frameTab[current].refBit = false;
+                else return current;
+            }
+            current = (current + 1) % N;
+        }
+        throw new IllegalStateException("No victim found.");
+    }
 }

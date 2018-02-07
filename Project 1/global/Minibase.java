@@ -9,82 +9,76 @@ import diskmgr.DiskMgr;
  */
 public class Minibase {
 
-	/** Name of the OS file. */
-	public static String DatabaseName;
+  /** Name of the OS file. */
+  public static String DatabaseName;
 
-	/** The Minibase Disk Space Manager. */
-	public static DiskMgr DiskManager;
+  /** The Minibase Disk Space Manager. */
+  public static DiskMgr DiskManager;
+  
+  /** The Minibase Buffer Manager. */
+  public static BufMgr BufferManager;
 
-	/** The Minibase Buffer Manager. */
-	public static BufMgr BufferManager;
+  // --------------------------------------------------------------------------
 
-	// --------------------------------------------------------------------------
+  /**
+   * Constructs and starts an instance of Minibase, given the configuration.
+   * 
+   * @param dbname Name of the data file
+   * @param num_pgs Number of pages to allocate
+   * @param bufpoolsize Buffer pool size (in pages)
+   * @param exists If the database already exists on disk
+   */
+  public Minibase(String dbname, int num_pgs, int bufpoolsize,
+      boolean exists) {
 
-	/**
-	 * Constructs and starts an instance of Minibase, given the configuration.
-	 * 
-	 * @param dbname
-	 *            Name of the data file
-	 * @param num_pgs
-	 *            Number of pages to allocate
-	 * @param bufpoolsize
-	 *            Buffer pool size (in pages)
-	 * @param exists
-	 *            If the database already exists on disk
-	 */
-	public Minibase(String dbname, int num_pgs, int bufpoolsize, boolean exists) {
+    // simply initialize the database
+    init(dbname, num_pgs, bufpoolsize, exists);
 
-		// simply initialize the database
-		init(dbname, num_pgs, bufpoolsize, exists);
+  } // constructor
 
-	} // constructor
+  /**
+   * Initializes the current instance of Minibase with the given configuration.
+   * 
+   * @param dbname Name of the data file
+   * @param num_pgs Number of pages to allocate
+   * @param bufpoolsize Buffer pool size (in pages)
+   * @param exists If the database already exists on disk
+   */
+  public void init(String dbname, int num_pgs, int bufpoolsize,
+      boolean exists) {
 
-	/**
-	 * Initializes the current instance of Minibase with the given configuration.
-	 * 
-	 * @param dbname
-	 *            Name of the data file
-	 * @param num_pgs
-	 *            Number of pages to allocate
-	 * @param bufpoolsize
-	 *            Buffer pool size (in pages)
-	 * @param exists
-	 *            If the database already exists on disk
-	 */
-	public void init(String dbname, int num_pgs, int bufpoolsize, boolean exists) {
+    // save the file name
+    DatabaseName = dbname;
 
-		// save the file name
-		DatabaseName = dbname;
+    // load the static layers
+    try {
+      DiskManager = new DiskMgr();
+      BufferManager = new BufMgr(bufpoolsize);
+    } catch (Exception exc) {
+      haltSystem(exc);
+    }
 
-		// load the static layers
-		try {
-			DiskManager = new DiskMgr();
-			BufferManager = new BufMgr(bufpoolsize);
-		} catch (Exception exc) {
-			haltSystem(exc);
-		}
+    // create or open the database
+    try {
+      if (exists) {
+        DiskManager.openDB(dbname);
+      } else {
+        DiskManager.createDB(dbname, num_pgs);
+        BufferManager.flushAllFrames();
+      }
+    } catch (Exception exc) {
+      haltSystem(exc);
+    }
 
-		// create or open the database
-		try {
-			if (exists) {
-				DiskManager.openDB(dbname);
-			} else {
-				DiskManager.createDB(dbname, num_pgs);
-				BufferManager.flushAllFrames();
-			}
-		} catch (Exception exc) {
-			haltSystem(exc);
-		}
+  } // init
 
-	} // init
-
-	/**
-	 * Displays an unrecoverable error and halts the system.
-	 */
-	public static void haltSystem(Exception exc) {
-		System.err.println("\n*** Unrecoverable system error ***");
-		exc.printStackTrace();
-		Runtime.getRuntime().exit(1);
-	}
+  /**
+   * Displays an unrecoverable error and halts the system.
+   */
+  public static void haltSystem(Exception exc) {
+    System.err.println("\n*** Unrecoverable system error ***");
+    exc.printStackTrace();
+    Runtime.getRuntime().exit(1);
+  }
 
 } // public class Minibase
