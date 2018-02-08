@@ -184,6 +184,7 @@ public class BufMgr implements GlobalConst {
 			if (bufMap.get(pageno).valid && bufMap.get(pageno).pinCount > 0) { //Added valid check
 				throw new IllegalArgumentException(pageno + " is pinned");
 			}
+			bufMap.get(pageno).valid = false;
 			bufMap.remove(pageno);
 		}
 		
