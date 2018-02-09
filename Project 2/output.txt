@@ -1,0 +1,64 @@
+Creating database...
+
+
+Running heap file tests...
+
+  Test 1: Insert and scan fixed-size records
+
+  - Create a heap file
+
+  - Add 6500 records to the file
+
+  - Scan the records just inserted
+
+  Test 1 completed successfully.
+
+
+  Test 2: Delete fixed-size records, scan remaining records
+
+  - Open the same heap file as test 1
+
+  - Delete half the records
+
+  - Scan the remaining records
+
+  Test 2 completed successfully.
+
+
+  Test 3-1: Update fixed-size records
+
+  - Open the same heap file as tests 1 and 2
+
+  - Change the records
+
+  - Check that the updates are really there
+
+  Test3-2: Test the efficiency of this implementation.
+
+  Test 3 completed successfully.
+
+
+  Test 4: Test some error conditions
+
+  - Try to change the size of a record
+
+  ** Shortening a record
+  --> Failed as expected 
+
+  - Try to insert a record that's too long
+  --> Failed as expected 
+
+
+--------------------------------------
+	Reads	Writes	Allocs	Pinned
+--------------------------------------
+test1	148	149	146	0
+test2	291	146	0	0
+test3-1	291	144	0	0
+test3-2	0	3	1	0
+test4	2	0	0	0
+--------------------------------------
+  Test 4 completed successfully.
+
+
+All heap file tests completed successfully!
