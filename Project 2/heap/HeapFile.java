@@ -51,8 +51,10 @@ public class HeapFile implements GlobalConst {
 			isTemp = true;
 			return;
 		}
+		
 		headId = Minibase.DiskManager.get_file_entry(name);
 		isTemp = false;
+		
 		if (headId == null) { //New page
 			DirPage newPage = new DirPage();
 			headId = Minibase.BufferManager.newPage(newPage, 1);
@@ -76,9 +78,24 @@ public class HeapFile implements GlobalConst {
 	 * library entry if appropriate.
 	 */
 	public void deleteFile() {
-
-		throw new UnsupportedOperationException("Not implemented");
-
+		PageId pageno = new PageId(headId.pid);
+		DirPage dirPage = new DirPage();
+		
+		//For all pages
+		while(pageno.pid != INVALID_PAGEID) {
+			Minibase.BufferManager.pinPage(pageno, dirPage, PIN_NOOP);
+			for(int i = 0; i < dirPage.getEntryCnt(); i++) {
+				Minibase.BufferManager.freePage(dirPage.getPageId(i));
+			}
+			
+			Minibase.BufferManager.unpinPage(pageno, UNPIN_CLEAN);
+			Minibase.BufferManager.freePage(pageno);
+			pageno = dirPage.getNextPage();
+		}
+		
+		if(!isTemp) {
+			Minibase.DiskManager.delete_file_entry(fileName);
+		}
 	} // public void deleteFile()
 
 	/**
@@ -149,9 +166,22 @@ public class HeapFile implements GlobalConst {
 	 * Gets the number of records in the file.
 	 */
 	public int getRecCnt() {
-
-		throw new UnsupportedOperationException("Not implemented");
-
+		int count = 0;
+		PageId pageno = new PageId(headId.pid);
+		DirPage dirPage = new DirPage();
+		
+		//For all pages
+		while(pageno.pid != INVALID_PAGEID) {
+			Minibase.BufferManager.pinPage(pageno, dirPage, PIN_NOOP);
+			for(int i = 0; i < dirPage.getEntryCnt(); i++) {
+				count++;
+			}
+			
+			Minibase.BufferManager.unpinPage(pageno, UNPIN_CLEAN);
+			pageno = dirPage.getNextPage();
+		}
+		
+		return count;
 	} // public int getRecCnt()
 
 	/**
@@ -175,9 +205,30 @@ public class HeapFile implements GlobalConst {
 	 * page that is in the buffer pool.
 	 */
 	protected PageId getAvailPage(int reclen) {
-
-		throw new UnsupportedOperationException("Not implemented");
-
+		PageId freePid = new PageId();
+		PageId pageno = new PageId(headId.pid);
+		DirPage dirPage = new DirPage();
+		
+		//For all pages
+		while(pageno.pid != INVALID_PAGEID) {
+			Minibase.BufferManager.pinPage(pageno, dirPage, PIN_NOOP);
+			for(int i = 0; i < dirPage.getEntryCnt(); i++) {
+				if(dirPage.getFreeCnt(i) < reclen) {
+					continue;
+				}
+				freePid = dirPage.getPageId(i);
+				break;
+			}
+			
+			Minibase.BufferManager.unpinPage(pageno, UNPIN_CLEAN);
+			pageno = dirPage.getNextPage();
+		}
+		
+		if (freePid.pid == INVALID_PAGEID) {
+			freePid = insertPage();
+		}
+		
+		return freePid;
 	} // protected PageId getAvailPage(int reclen)
 
 	/**
