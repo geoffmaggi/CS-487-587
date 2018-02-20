@@ -47,9 +47,18 @@ public class HeapFile implements GlobalConst {
 	 * temporary file which requires no file library entry.
 	 */
 	public HeapFile(String name) {
-
-		throw new UnsupportedOperationException("Not implemented");
-
+		if (name == null) {
+			isTemp = true;
+			return;
+		}
+		headId = Minibase.DiskManager.get_file_entry(name);
+		isTemp = false;
+		if (headId == null) { //New page
+			DirPage newPage = new DirPage();
+			headId = Minibase.BufferManager.newPage(newPage, 1);
+			newPage.setCurPage(headId);
+			Minibase.BufferManager.unpinPage(headId, true);
+		}
 	} // public HeapFile(String name)
 
 	/**
@@ -57,9 +66,9 @@ public class HeapFile implements GlobalConst {
 	 * object; deletes the heap file if it's temporary.
 	 */
 	protected void finalize() throws Throwable {
-
-		throw new UnsupportedOperationException("Not implemented");
-
+		if (isTemp) {
+			deleteFile();
+		}
 	} // protected void finalize() throws Throwable
 
 	/**
@@ -82,8 +91,16 @@ public class HeapFile implements GlobalConst {
 	 *           if the record is too large to fit on one data page
 	 */
 	public RID insertRecord(byte[] record) {
-
-		throw new UnsupportedOperationException("Not implemented");
+		if(record.length > MAX_TUPSIZE) {
+			throw new IllegalArgumentException("Record is too large");
+		}
+		PageId pageno = getAvailPage(record.length);
+		DataPage page = new DataPage();
+		Minibase.BufferManager.pinPage(pageno, page, PIN_NOOP);
+		RID rid = page.insertRecord(record);
+		Minibase.BufferManager.unpinPage(rid.pageno, UNPIN_DIRTY);
+		updateDirEntry(pageno, 1, page.getFreeSpace());
+		return rid;
 	} // public RID insertRecord(byte[] record)
 
 	/**
@@ -93,9 +110,11 @@ public class HeapFile implements GlobalConst {
 	 *           if the rid is invalid
 	 */
 	public byte[] selectRecord(RID rid) {
-
-		throw new UnsupportedOperationException("Not implemented");
-
+		DataPage page = new DataPage();
+		Minibase.BufferManager.pinPage(rid.pageno, page, PIN_NOOP);
+		byte ret[] = page.selectRecord(rid);
+		Minibase.BufferManager.unpinPage(rid.pageno, UNPIN_CLEAN);
+		return ret;
 	} // public byte[] selectRecord(RID rid)
 
 	/**
@@ -105,9 +124,10 @@ public class HeapFile implements GlobalConst {
 	 *           if the rid or new record is invalid
 	 */
 	public void updateRecord(RID rid, byte[] newRecord) {
-
-		throw new UnsupportedOperationException("Not implemented");
-
+		DataPage page = new DataPage();
+		Minibase.BufferManager.pinPage(rid.pageno, page, PIN_NOOP);
+		page.updateRecord(rid, newRecord);
+		Minibase.BufferManager.unpinPage(rid.pageno, UNPIN_DIRTY);
 	} // public void updateRecord(RID rid, byte[] newRecord)
 
 	/**
@@ -118,9 +138,11 @@ public class HeapFile implements GlobalConst {
 	 *           if the rid is invalid
 	 */
 	public void deleteRecord(RID rid) {
-
-		throw new UnsupportedOperationException("Not implemented");
-
+		DataPage page = new DataPage();
+		Minibase.BufferManager.pinPage(rid.pageno, page, PIN_NOOP);
+		page.deleteRecord(rid);
+		Minibase.BufferManager.unpinPage(rid.pageno, UNPIN_DIRTY);
+		updateDirEntry(rid.pageno, -1, page.getFreeSpace());
 	} // public void deleteRecord(RID rid)
 
 	/**
