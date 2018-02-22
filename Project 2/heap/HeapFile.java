@@ -173,6 +173,7 @@ public class HeapFile implements GlobalConst {
 		//For all pages
 		while(pageno.pid != INVALID_PAGEID) {
 			Minibase.BufferManager.pinPage(pageno, dirPage, PIN_NOOP);
+			// count += dirPage.getEntryCnt() ?
 			for(int i = 0; i < dirPage.getEntryCnt(); i++) {
 				count++;
 			}
@@ -244,8 +245,30 @@ public class HeapFile implements GlobalConst {
 	 * @return index of the data page's entry on the directory page
 	 */
 	protected int findDirEntry(PageId pageno, PageId dirId, DirPage dirPage) {
+        PageId curPageNo = new PageId(headId.pid);
+        int dataPageIndex = -1;
 
-		throw new UnsupportedOperationException("Not implemented");
+        //For all pages
+        while(curPageNo.pid != INVALID_PAGEID) {
+            Minibase.BufferManager.pinPage(curPageNo, dirPage, PIN_NOOP);
+            for (int i = 0; i < dirPage.getEntryCnt(); i++) {
+                if (dirPage.getPageId(i).pid != pageno.pid) {
+                    continue;
+                }
+                dirId.copyPageId(dirPage.getPageId(i));
+                dataPageIndex = i;
+                break;
+                // Do we need to unpin before we break?
+            }
+
+            Minibase.BufferManager.unpinPage(curPageNo, UNPIN_CLEAN);
+            curPageNo = dirPage.getNextPage();
+        }
+
+        // What if we don't find the data page in any directory page?
+
+		return dataPageIndex;
+
 
 	} // protected int findEntry(PageId pageno, PageId dirId, DirPage dirPage)
 
@@ -261,8 +284,30 @@ public class HeapFile implements GlobalConst {
 	 *          input new value of freecnt for the directory entry
 	 */
 	protected void updateDirEntry(PageId pageno, int deltaRec, int freecnt) {
+	    PageId curPageNo = new PageId(headId.pid);
+        DirPage dirPage = new DirPage();
 
-		throw new UnsupportedOperationException("Not implemented");
+        //For all pages
+        while(curPageNo.pid != INVALID_PAGEID) {
+            Minibase.BufferManager.pinPage(curPageNo, dirPage, PIN_NOOP);
+            for(int i = 0; i < dirPage.getEntryCnt(); i++) {
+                if(dirPage.getPageId(i).pid != pageno.pid) {
+                    continue;
+                }
+                dirPage.setRecCnt(i, (short) (dirPage.getRecCnt(i) + deltaRec));
+                dirPage.setFreeCnt(i, (short) freecnt);
+                break;
+                // Do we need to unpin before we break?
+            }
+
+            // if page is empty, remove it
+            // if(dirPage.getEntryEnt() == 0 {remove dirPage}
+
+            Minibase.BufferManager.unpinPage(curPageNo, UNPIN_CLEAN);
+            curPageNo = dirPage.getNextPage();
+        }
+
+        // What if we don't find the data page in any directory page?
 
 	} // protected void updateEntry(PageId pageno, int deltaRec, int deltaFree)
 
@@ -274,8 +319,31 @@ public class HeapFile implements GlobalConst {
 	 * @return id of the new data page
 	 */
 	protected PageId insertPage() {
+        PageId curPageNo = new PageId(headId.pid);
+        DirPage dirPage = new DirPage();
 
-		throw new UnsupportedOperationException("Not implemented");
+        //For all pages
+        while(curPageNo.pid != INVALID_PAGEID) {
+            Minibase.BufferManager.pinPage(curPageNo, dirPage, PIN_NOOP);
+            if(dirPage.getNextPage().pid == INVALID_PAGEID) {
+                if(dirPage.getEntryCnt() == dirPage.MAX_ENTRIES){
+                    DirPage newPage = new DirPage();
+                    PageId dirId = Minibase.BufferManager.newPage(newPage, 1);
+                    newPage.setCurPage(dirId);
+                    dirPage.setNextPage(dirId);
+                    Minibase.BufferManager.unpinPage(dirId, true);
+                }
+                else {
+                    DataPage dataPage = new DataPage();
+                    PageId dataId = Minibase.BufferManager.newPage(dataPage, 1);
+                    dirPage.setPageId(dirPage.getEntryCnt(), dataId);
+                    Minibase.BufferManager.unpinPage(dataId, true);
+                    return dataId;
+                }
+            }
+            Minibase.BufferManager.unpinPage(curPageNo, UNPIN_CLEAN);
+            curPageNo = dirPage.getNextPage();
+        }
 
 	} // protected PageId insertPage()
 
@@ -293,8 +361,23 @@ public class HeapFile implements GlobalConst {
 	 *          input the data page's entry on the directory page
 	 */
 	protected void deletePage(PageId pageno, PageId dirId, DirPage dirPage, int index) {
-
-		throw new UnsupportedOperationException("Not implemented");
+	    // is dirPage already set to the directory page containing the data file we want to delete?
+        // If not, we need to get that dirPage like so:
+//        while(curPageNo.pid != INVALID_PAGEID) {
+//            Minibase.BufferManager.pinPage(curPageNo, dirPage, PIN_NOOP);
+//            for (int i = 0; i < dirPage.getEntryCnt(); i++) {
+//                if (dirPage.getPageId(i).pid != pageno.pid) {
+//                    continue;
+//                }
+//                break;
+//            }
+//
+//            Minibase.BufferManager.unpinPage(curPageNo, UNPIN_CLEAN);
+//            curPageNo = dirPage.getNextPage();
+//        }
+	    dirPage.compact(index);
+	    // Delete data page from heap file?
+        // if(dirPage.getEntryEnt() == 0 {delete dirPage}
 
 	} // protected void deletePage(PageId, PageId, DirPage, int)
 
