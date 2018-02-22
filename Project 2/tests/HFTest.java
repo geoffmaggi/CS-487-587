@@ -36,9 +36,9 @@ class HFTest extends TestDriver {
 		System.out.println("\n" + "Running " + TEST_NAME + "...");
 		boolean status = PASS;
 		status &= hft.test1();
-		status &= hft.test2();
-		status &= hft.test3();
-		status &= hft.test4();
+		//status &= hft.test2();
+		//status &= hft.test3();
+		//status &= hft.test4();
 
 		// display the final results
 		System.out.println();
