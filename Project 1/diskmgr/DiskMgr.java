@@ -352,6 +352,7 @@ public class DiskMgr implements GlobalConst {
 
 		// initialize reused variables
 		int count = 0;
+		@SuppressWarnings("unused") //mine
 		int bit_number = 0;
 		PageId pgid = new PageId();
 		Page apage = new Page();
