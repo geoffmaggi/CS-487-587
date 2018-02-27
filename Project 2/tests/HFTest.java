@@ -41,8 +41,8 @@ class HFTest extends TestDriver {
 		status &= hft.test2();
 		status &= hft.test3();
 		status &= hft.test4();
-		status &= hft.test5();
-		status &= hft.test6();
+		//status &= hft.test5();
+		//status &= hft.test6();
 
 		// display the final results
 		System.out.println();
