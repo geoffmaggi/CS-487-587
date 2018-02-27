@@ -1,6 +1,7 @@
 /* Minibase Implementation for CS 487/587
  * Docs: http://pages.cs.wisc.edu/~dbbook/openAccess/Minibase/minibase.html
  * Authors: Alexander Goddard & Geoff Maggi
+ * Github: https://github.com/geoffmaggi/CS-487-587
  */
 
 package heap;
@@ -296,8 +297,8 @@ public class HeapFile implements GlobalConst {
 		if (reccnt < 1) {
 			deletePage(pageno, dirId, dirPage, index);
 		} else {
-			dirPage.setRecCnt(index, reccnt);
-			dirPage.setFreeCnt(index, freecnt);
+			dirPage.setRecCnt(index, (short)reccnt);
+			dirPage.setFreeCnt(index, (short)freecnt);
 			Minibase.BufferManager.unpinPage(dirId, UNPIN_DIRTY);
 		}
 	} // protected void updateEntry(PageId pageno, int deltaRec, int deltaFree)
@@ -346,9 +347,9 @@ public class HeapFile implements GlobalConst {
 		dataPage.setCurPage(dataId);
 
 		dirPage.setPageId(index, dataId);
-		dirPage.setRecCnt(index, 0);
+		dirPage.setRecCnt(index, (short)0);
 		dirPage.setFreeCnt(index, dataPage.getFreeSpace());
-		dirPage.setEntryCnt(index + 1);
+		dirPage.setEntryCnt((short)(index + 1));
 
 		Minibase.BufferManager.unpinPage(dataId, UNPIN_DIRTY);
 		Minibase.BufferManager.unpinPage(dirId, UNPIN_DIRTY);
@@ -386,7 +387,7 @@ public class HeapFile implements GlobalConst {
 			Minibase.BufferManager.unpinPage(dirId, UNPIN_DIRTY);
 			Minibase.BufferManager.freePage(dirId);
 		} else {
-			dirPage.setEntryCnt(count - 1);
+			dirPage.setEntryCnt((short)(count - 1));
 			Minibase.BufferManager.unpinPage(dirId, UNPIN_DIRTY);
 		}
 	} // protected void deletePage(PageId, PageId, DirPage, int)
