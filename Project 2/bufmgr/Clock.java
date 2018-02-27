@@ -10,18 +10,21 @@ package bufmgr;
  */
 class Clock {
 	int current;
-	
+
 	public Clock() {
-			current = 0;
+		current = 0;
 	}
-	
+
 	public int pickVictim(FrameDesc[] bufPool) {
 		int N = bufPool.length;
-		for(int counter = 0; counter < N*2; counter++) {
-			if(!bufPool[current].valid) return current;
-			if(bufPool[current].pinCount < 1) {
-				if(bufPool[current].refbit) bufPool[current].refbit = false;
-				else return current;
+		for (int counter = 0; counter < N * 2; counter++) {
+			if (!bufPool[current].valid)
+				return current;
+			if (bufPool[current].pinCount < 1) {
+				if (bufPool[current].refbit)
+					bufPool[current].refbit = false;
+				else
+					return current;
 			}
 			current = (current + 1) % N;
 		}

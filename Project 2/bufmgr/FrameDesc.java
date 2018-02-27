@@ -23,21 +23,22 @@ class FrameDesc {
 		dirty = false;
 		valid = false;
 		refbit = false;
-		pageNo = new PageId(); //Invalid at first
+		pageNo = new PageId(); // Invalid at first
 		pinCount = 0;
 		page = new Page();
 	}
 
 	/**
 	 * Sets the new ID of the frame and resets dirty, valid, refbit and pin count.
+	 * 
 	 * @param pageNo
-	 * 			The new Page ID
+	 *          The new Page ID
 	 */
 	public void setFrame(PageId pageNo) {
 		this.dirty = false;
 		this.valid = true;
 		this.refbit = true;
-		this.pageNo.copyPageId(pageNo); //deep copy the pageNo
+		this.pageNo.copyPageId(pageNo); // deep copy the pageNo
 		this.pinCount = 1;
 	}
 }

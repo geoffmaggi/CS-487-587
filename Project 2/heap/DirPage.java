@@ -52,9 +52,9 @@ class DirPage extends HFPage {
 	 * Sets the number of directory entries on the page.
 	 */
 	public void setEntryCnt(int entryCnt) {
-		setEntryCnt((short)entryCnt);
+		setEntryCnt((short) entryCnt);
 	}
-	
+
 	public void setEntryCnt(short entryCnt) {
 		setShortValue(entryCnt, ENTRY_COUNT);
 	}
@@ -84,9 +84,9 @@ class DirPage extends HFPage {
 	 * Sets the record count at the given index.
 	 */
 	public void setRecCnt(int slotno, int recCnt) {
-		setRecCnt(slotno, (short)recCnt);
+		setRecCnt(slotno, (short) recCnt);
 	}
-	
+
 	public void setRecCnt(int slotno, short recCnt) {
 		setShortValue(recCnt, HEADER_SIZE + slotno * ENTRY_SIZE + IX_REC_CNT);
 	}
@@ -102,9 +102,9 @@ class DirPage extends HFPage {
 	 * Sets the free count at the given index.
 	 */
 	public void setFreeCnt(int slotno, int freeCnt) {
-		setFreeCnt(slotno, (short)freeCnt);
+		setFreeCnt(slotno, (short) freeCnt);
 	}
-	
+
 	public void setFreeCnt(int slotno, short freeCnt) {
 		setShortValue(freeCnt, HEADER_SIZE + slotno * ENTRY_SIZE + IX_FREE_CNT);
 	}

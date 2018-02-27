@@ -61,6 +61,7 @@ public class HeapFile implements GlobalConst {
 				headId = Minibase.BufferManager.newPage(newPage, 1);
 				newPage.setCurPage(headId);
 				Minibase.BufferManager.unpinPage(headId, UNPIN_DIRTY);
+				Minibase.BufferManager.flushPage(headId); // Do we need this?
 				Minibase.DiskManager.add_file_entry(name, headId);
 			}
 		} else {
@@ -118,7 +119,7 @@ public class HeapFile implements GlobalConst {
 		}
 		PageId pageno = getAvailPage(record.length);
 		DataPage page = new DataPage();
-		Minibase.BufferManager.pinPage(pageno, page, PIN_MEMCPY);
+		Minibase.BufferManager.pinPage(pageno, page, PIN_MEMCPY); // Should this be NOOP?
 		RID rid = page.insertRecord(record);
 		updateDirEntry(pageno, 1, page.getFreeSpace());
 		Minibase.BufferManager.unpinPage(pageno, UNPIN_DIRTY);
@@ -132,6 +133,9 @@ public class HeapFile implements GlobalConst {
 	 *           if the rid is invalid
 	 */
 	public byte[] selectRecord(RID rid) {
+		if (rid.pageno.pid == INVALID_PAGEID) {
+			throw new IllegalArgumentException("Invalid Record Id");
+		}
 		DataPage page = new DataPage();
 		Minibase.BufferManager.pinPage(rid.pageno, page, PIN_DISKIO);
 		byte ret[] = page.selectRecord(rid);
@@ -146,6 +150,9 @@ public class HeapFile implements GlobalConst {
 	 *           if the rid or new record is invalid
 	 */
 	public void updateRecord(RID rid, byte[] newRecord) {
+		if (rid.pageno.pid == INVALID_PAGEID) {
+			throw new IllegalArgumentException("Invalid Record Id");
+		}
 		DataPage page = new DataPage();
 		Minibase.BufferManager.pinPage(rid.pageno, page, PIN_NOOP);
 		page.updateRecord(rid, newRecord);
@@ -160,6 +167,9 @@ public class HeapFile implements GlobalConst {
 	 *           if the rid is invalid
 	 */
 	public void deleteRecord(RID rid) {
+		if (rid.pageno.pid == INVALID_PAGEID) {
+			throw new IllegalArgumentException("Invalid Record Id");
+		}
 		DataPage page = new DataPage();
 		Minibase.BufferManager.pinPage(rid.pageno, page, PIN_NOOP);
 		page.deleteRecord(rid);
@@ -281,14 +291,14 @@ public class HeapFile implements GlobalConst {
 		PageId dirId = new PageId();
 		DirPage dirPage = new DirPage();
 
-		int index = findDirEntry(pageno, dirId, dirPage); // Also pins the page
+		int index = findDirEntry(pageno, dirId, dirPage);
 		int reccnt = dirPage.getRecCnt(index) + deltaRec;
 		if (reccnt < 1) {
 			deletePage(pageno, dirId, dirPage, index);
 		} else {
 			dirPage.setRecCnt(index, reccnt);
 			dirPage.setFreeCnt(index, freecnt);
-			Minibase.BufferManager.unpinPage(dirId, UNPIN_CLEAN);
+			Minibase.BufferManager.unpinPage(dirId, UNPIN_DIRTY);
 		}
 	} // protected void updateEntry(PageId pageno, int deltaRec, int deltaFree)
 
@@ -323,7 +333,6 @@ public class HeapFile implements GlobalConst {
 					dirId = newDirId;
 					nextId = newDirId;
 					dirPage = newDirPage;
-					index = 0;
 				}
 
 				Minibase.BufferManager.unpinPage(dirId, UNPIN_CLEAN);
@@ -364,7 +373,8 @@ public class HeapFile implements GlobalConst {
 		dirPage.compact(index);
 
 		int count = dirPage.getEntryCnt();
-		if (count == 1 && dirId.pid != headId.pid) {
+		// Could be 0 or 1??
+		if (count == 0 && dirId.pid != headId.pid) {
 			DirPage page = new DirPage();
 			PageId prevId = dirPage.getPrevPage();
 			PageId nextId = dirPage.getNextPage();
@@ -373,7 +383,7 @@ public class HeapFile implements GlobalConst {
 			page.setNextPage(nextId);
 			Minibase.BufferManager.unpinPage(prevId, UNPIN_DIRTY);
 
-			Minibase.BufferManager.unpinPage(dirId, UNPIN_CLEAN);
+			Minibase.BufferManager.unpinPage(dirId, UNPIN_DIRTY);
 			Minibase.BufferManager.freePage(dirId);
 		} else {
 			dirPage.setEntryCnt(count - 1);

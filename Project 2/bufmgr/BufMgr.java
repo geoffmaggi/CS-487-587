@@ -84,26 +84,26 @@ public class BufMgr implements GlobalConst {
 	 *           if all pages are pinned (i.e. pool is full)
 	 */
 	public void pinPage(PageId pageno, Page mempage, int contents) {
-		if(bufMap.containsKey(pageno)) {
-			if(bufMap.get(pageno).pinCount != 0 && contents == PIN_MEMCPY) {
+		if (bufMap.containsKey(pageno)) {
+			if (bufMap.get(pageno).pinCount != 0 && contents == PIN_MEMCPY) {
 				throw new IllegalArgumentException("Pinned and memcpy");
 			}
 			bufMap.get(pageno).pinCount++;
 			mempage.setPage(bufMap.get(pageno).page);
 			return;
 		}
-		
+
 		if (getNumUnpinned() == 0) {
 			throw new IllegalStateException("The buffer pool is full");
 		}
-		
+
 		int victim = replPolicy.pickVictim(bufPool);
-		
-		if(bufPool[victim].valid && bufPool[victim].dirty) {
+
+		if (bufPool[victim].valid && bufPool[victim].dirty) {
 			flushPage(bufPool[victim]);
 		}
 		bufMap.remove(bufPool[victim].pageNo);
-		
+
 		switch (contents) {
 			case PIN_DISKIO:
 				Minibase.DiskManager.read_page(pageno, bufPool[victim].page);
@@ -112,7 +112,7 @@ public class BufMgr implements GlobalConst {
 				bufPool[victim].page.copyPage(mempage);
 				break;
 			case PIN_NOOP:
-				//Do Nothing
+				// Do Nothing
 				break;
 		}
 
@@ -126,8 +126,9 @@ public class BufMgr implements GlobalConst {
 	 * 
 	 * @param pageno
 	 *          identifies the page to unpin
-	 * @param dirty (Changed from original specs)
-	 *          if true for any unpin set dirty to true
+	 * @param dirty
+	 *          (Changed from original specs) if true for any unpin set dirty to
+	 *          true
 	 * @throws IllegalArgumentException
 	 *           if the page is not in the buffer pool or not pinned
 	 */
@@ -138,7 +139,7 @@ public class BufMgr implements GlobalConst {
 		if (this.bufMap.get(pageno).pinCount == 0) {
 			throw new IllegalArgumentException("Page: " + pageno + " is not pinned");
 		}
-		
+
 		bufMap.get(pageno).dirty |= dirty;
 		bufMap.get(pageno).pinCount--;
 	}
@@ -181,13 +182,13 @@ public class BufMgr implements GlobalConst {
 	 */
 	public void freePage(PageId pageno) {
 		if (bufMap.containsKey(pageno)) {
-			if (bufMap.get(pageno).valid && bufMap.get(pageno).pinCount > 0) { //Added valid check
+			if (bufMap.get(pageno).valid && bufMap.get(pageno).pinCount > 0) { // Added valid check
 				throw new IllegalArgumentException(pageno + " is pinned");
 			}
 			bufMap.get(pageno).valid = false;
 			bufMap.remove(pageno);
 		}
-		
+
 		Minibase.DiskManager.deallocate_page(pageno);
 	}
 
@@ -210,7 +211,7 @@ public class BufMgr implements GlobalConst {
 	public void flushPage(FrameDesc curFrame) {
 		flushPage(curFrame.pageNo);
 	}
-	
+
 	/**
 	 * Write a page in the buffer pool to disk, if dirty.
 	 * 
