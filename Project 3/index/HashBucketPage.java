@@ -18,18 +18,18 @@ class HashBucketPage extends SortedPage {
 	 */
 	public int countEntries() {
 		int count = getEntryCount();
-		
+
 		PageId pageno = getNextPage();
 		HashBucketPage hPage = new HashBucketPage();
 
-		while(pageno.pid != INVALID_PAGEID) { //For all pages
+		while (pageno.pid != INVALID_PAGEID) { // For all pages
 			Minibase.BufferManager.pinPage(pageno, hPage, PIN_DISKIO);
 			count += hPage.getEntryCount();
 			PageId nextId = hPage.getNextPage();
 			Minibase.BufferManager.unpinPage(pageno, UNPIN_CLEAN);
 			pageno = nextId;
 		}
-		
+
 		return count;
 	} // public int countEntries()
 
@@ -48,18 +48,16 @@ class HashBucketPage extends SortedPage {
 		try {
 			super.insertEntry(entry);
 			return true;
-		}
-		catch(Exception e) {
+		} catch (Exception e) {
 			PageId pageno = getNextPage();
 			HashBucketPage hPage = new HashBucketPage();
 
-			if(pageno.pid != INVALID_PAGEID) { //For all pages recursive
+			if (pageno.pid != INVALID_PAGEID) { // For all pages recursive
 				Minibase.BufferManager.pinPage(pageno, hPage, PIN_DISKIO);
 				boolean dirty = hPage.insertEntry(entry);
-				Minibase.BufferManager.unpinPage(pageno, dirty?UNPIN_DIRTY:UNPIN_CLEAN);
+				Minibase.BufferManager.unpinPage(pageno, dirty ? UNPIN_DIRTY : UNPIN_CLEAN);
 				return false;
-			}
-			else { //we are the last page
+			} else { // we are the last page
 				pageno = Minibase.BufferManager.newPage(hPage, 1);
 				setNextPage(pageno);
 				hPage.insertEntry(entry);
@@ -84,25 +82,23 @@ class HashBucketPage extends SortedPage {
 		try {
 			super.deleteEntry(entry);
 			return true;
-		}
-		catch(Exception e) {
+		} catch (Exception e) {
 			PageId pageno = getNextPage();
 			HashBucketPage hPage = new HashBucketPage();
 
-			if(pageno.pid != INVALID_PAGEID) { //For all pages recursive
+			if (pageno.pid != INVALID_PAGEID) { // For all pages recursive
 				Minibase.BufferManager.pinPage(pageno, hPage, PIN_DISKIO);
 				boolean dirty = hPage.deleteEntry(entry);
-				
-				if(hPage.getEntryCount() < 1) { //if empty remove it
+
+				if (hPage.getEntryCount() < 1) { // if empty remove it
 					setNextPage(hPage.getNextPage());
-					Minibase.BufferManager.unpinPage(pageno, dirty?UNPIN_DIRTY:UNPIN_CLEAN);
+					Minibase.BufferManager.unpinPage(pageno, dirty ? UNPIN_DIRTY : UNPIN_CLEAN);
 					Minibase.BufferManager.freePage(pageno);
+				} else {
+					Minibase.BufferManager.unpinPage(pageno, dirty ? UNPIN_DIRTY : UNPIN_CLEAN);
 				}
-				
-				Minibase.BufferManager.unpinPage(pageno, dirty?UNPIN_DIRTY:UNPIN_CLEAN);
 				return false;
-			}
-			else {
+			} else {
 				throw new IllegalArgumentException("Unable to delete entry: Entry not found");
 			}
 		}
