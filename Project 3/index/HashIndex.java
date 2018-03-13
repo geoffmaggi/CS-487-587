@@ -1,3 +1,9 @@
+/* Minibase Implementation for CS 487/587
+ * Docs: http://pages.cs.wisc.edu/~dbbook/openAccess/Minibase/minibase.html
+ * Authors: Alexander Goddard & Geoff Maggi
+ * Github: https://github.com/geoffmaggi/CS-487-587
+ */
+
 package index;
 
 import global.GlobalConst;
@@ -5,7 +11,6 @@ import global.Minibase;
 import global.PageId;
 import global.RID;
 import global.SearchKey;
-//import heap.DirPage;
 
 /**
  * <h3>Minibase Hash Index</h3> This unclustered index implements static hashing
@@ -175,9 +180,9 @@ public class HashIndex implements GlobalConst {
 		try {
 			dataPage.deleteEntry(entry);
 			Minibase.BufferManager.unpinPage(newPid, UNPIN_DIRTY);
-		} catch (IllegalArgumentException exc) {
+		} catch (Exception e) {
 			Minibase.BufferManager.unpinPage(newPid, UNPIN_CLEAN);
-			throw exc;
+			throw e;
 		}
 	} // public void deleteEntry(SearchKey key, RID rid)
 
@@ -215,7 +220,6 @@ public class HashIndex implements GlobalConst {
 		String fileName = this.fileName == null ? "temp" : this.fileName;
 		System.out.println();
 		System.out.println(fileName);
-
 		System.out.println("-------------");
 
 		int total = 0;
@@ -250,7 +254,6 @@ public class HashIndex implements GlobalConst {
 			PageId nextId = dirPage.getNextPage();
 			Minibase.BufferManager.unpinPage(pageno, UNPIN_CLEAN);
 			pageno = nextId;
-
 		}
 
 		System.out.println("-------------");

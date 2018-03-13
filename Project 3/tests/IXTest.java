@@ -47,10 +47,10 @@ class IXTest extends TestDriver {
 		status &= hft.test2();
 		retval = true;
 		status &= hft.test3();
-		// retval = true;
-		// status &= hft.test4();
-		// retval = true;
-		// status &= hft.test5();
+		retval = true;
+		status &= hft.test4();
+		retval = true;
+		status &= hft.test5();
 
 		// display the final results
 		System.out.println();

@@ -1,3 +1,9 @@
+/* Minibase Implementation for CS 487/587
+ * Docs: http://pages.cs.wisc.edu/~dbbook/openAccess/Minibase/minibase.html
+ * Authors: Alexander Goddard & Geoff Maggi
+ * Github: https://github.com/geoffmaggi/CS-487-587
+ */
+
 package index;
 
 import global.Minibase;
@@ -54,9 +60,9 @@ class HashBucketPage extends SortedPage {
 
 			if (pageno.pid != INVALID_PAGEID) { // For all pages recursive
 				Minibase.BufferManager.pinPage(pageno, hPage, PIN_DISKIO);
-				boolean dirty = hPage.insertEntry(entry);
-				Minibase.BufferManager.unpinPage(pageno, dirty ? UNPIN_DIRTY : UNPIN_CLEAN);
-				return false;
+				boolean inserted = hPage.insertEntry(entry);
+				Minibase.BufferManager.unpinPage(pageno, inserted ? UNPIN_DIRTY : UNPIN_CLEAN);
+				return inserted;
 			} else { // we are the last page
 				pageno = Minibase.BufferManager.newPage(hPage, 1);
 				setNextPage(pageno);
@@ -88,16 +94,16 @@ class HashBucketPage extends SortedPage {
 
 			if (pageno.pid != INVALID_PAGEID) { // For all pages recursive
 				Minibase.BufferManager.pinPage(pageno, hPage, PIN_DISKIO);
-				boolean dirty = hPage.deleteEntry(entry);
+				boolean deleted = hPage.deleteEntry(entry);
 
 				if (hPage.getEntryCount() < 1) { // if empty remove it
 					setNextPage(hPage.getNextPage());
-					Minibase.BufferManager.unpinPage(pageno, dirty ? UNPIN_DIRTY : UNPIN_CLEAN);
+					Minibase.BufferManager.unpinPage(pageno, deleted ? UNPIN_DIRTY : UNPIN_CLEAN);
 					Minibase.BufferManager.freePage(pageno);
 				} else {
-					Minibase.BufferManager.unpinPage(pageno, dirty ? UNPIN_DIRTY : UNPIN_CLEAN);
+					Minibase.BufferManager.unpinPage(pageno, deleted ? UNPIN_DIRTY : UNPIN_CLEAN);
 				}
-				return false;
+				return deleted;
 			} else {
 				throw new IllegalArgumentException("Unable to delete entry: Entry not found");
 			}

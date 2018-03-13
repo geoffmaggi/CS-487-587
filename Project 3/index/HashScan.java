@@ -1,3 +1,9 @@
+/* Minibase Implementation for CS 487/587
+ * Docs: http://pages.cs.wisc.edu/~dbbook/openAccess/Minibase/minibase.html
+ * Authors: Alexander Goddard & Geoff Maggi
+ * Github: https://github.com/geoffmaggi/CS-487-587
+ */
+
 package index;
 
 import global.GlobalConst;
