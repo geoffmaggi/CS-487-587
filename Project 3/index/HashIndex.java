@@ -69,7 +69,7 @@ public class HashIndex implements GlobalConst {
 		PageId pageno = new PageId(headId.pid);
 		HashDirPage dirPage = new HashDirPage();
 
-		// For all pages
+		// For all dir pages
 		while (pageno.pid != INVALID_PAGEID) {
 			Minibase.BufferManager.pinPage(pageno, dirPage, PIN_DISKIO);
 
@@ -216,9 +216,7 @@ public class HashIndex implements GlobalConst {
 		System.out.println();
 		System.out.println(fileName);
 
-		System.out.print("-------------");
-
-		System.out.println();
+		System.out.println("-------------");
 
 		int total = 0;
 
@@ -226,13 +224,13 @@ public class HashIndex implements GlobalConst {
 		HashDirPage dirPage = new HashDirPage();
 		HashBucketPage dataPage = new HashBucketPage();
 
-		while (pageno.pid != INVALID_PAGEID) {
+		while (pageno.pid != INVALID_PAGEID) { //For all records
 			Minibase.BufferManager.pinPage(pageno, dirPage, PIN_DISKIO);
 			int count = dirPage.getEntryCount();
 
 			for (int i = 0; i < count; i++) {
-				String hash = Integer.toString(i, 2);
-				for (int j = 0; j < DEPTH - hash.length(); j++) {
+				String hash = Integer.toString(i);
+				for (int j = 0; j < DEPTH - hash.length(); j++) { //print the hash pretty
 					System.out.print('0');
 				}
 				System.out.print(hash + " : ");
@@ -255,8 +253,7 @@ public class HashIndex implements GlobalConst {
 
 		}
 
-		System.out.print("-------------");
-		System.out.println();
+		System.out.println("-------------");
 		System.out.println("Total : " + total);
 	} // public void printSummary()
 

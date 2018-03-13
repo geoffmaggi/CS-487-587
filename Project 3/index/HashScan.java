@@ -31,22 +31,22 @@ public class HashScan implements GlobalConst {
 	 * Constructs an equality scan by initializing the iterator state.
 	 */
 	protected HashScan(HashIndex index, SearchKey key) {
-		int hashValue = key.getHash(index.DEPTH);
+		int hash = key.getHash(index.DEPTH);
 		this.key = new SearchKey(key);
 
 		PageId pageno = new PageId(index.headId.pid);
 		HashDirPage dirPage = new HashDirPage();
 
-		while (hashValue >= HashDirPage.MAX_ENTRIES) {
+		while (hash >= HashDirPage.MAX_ENTRIES) {
 			Minibase.BufferManager.pinPage(pageno, dirPage, PIN_DISKIO);
 			PageId nextId = dirPage.getNextPage();
 			Minibase.BufferManager.unpinPage(pageno, UNPIN_CLEAN);
 			pageno = nextId;
-			hashValue = hashValue - HashDirPage.MAX_ENTRIES;
+			hash -= HashDirPage.MAX_ENTRIES;
 		}
 
 		Minibase.BufferManager.pinPage(pageno, dirPage, PIN_DISKIO);
-		curPageId = dirPage.getPageId(hashValue);
+		curPageId = dirPage.getPageId(hash);
 		Minibase.BufferManager.unpinPage(pageno, UNPIN_CLEAN);
 		curPage = new HashBucketPage();
 
