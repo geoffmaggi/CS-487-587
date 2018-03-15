@@ -228,16 +228,13 @@ public class HashIndex implements GlobalConst {
 		HashDirPage dirPage = new HashDirPage();
 		HashBucketPage dataPage = new HashBucketPage();
 
-		while (pageno.pid != INVALID_PAGEID) { //For all records
+		while (pageno.pid != INVALID_PAGEID) { // For all records
 			Minibase.BufferManager.pinPage(pageno, dirPage, PIN_DISKIO);
 			int count = dirPage.getEntryCount();
 
 			for (int i = 0; i < count; i++) {
-				String hash = Integer.toString(i);
-				for (int j = 0; j < DEPTH - hash.length(); j++) { //print the hash pretty
-					System.out.print('0');
-				}
-				System.out.print(hash + " : ");
+				String address = String.format("%08d", Integer.toString(i));
+				System.out.print(address + " : ");
 
 				PageId pid = dirPage.getPageId(i);
 				if (pid.pid != INVALID_PAGEID) {
