@@ -1,4 +1,4 @@
-# CS 487/587 - Database Implementation
+# MiniBase DB in Jave for CS 487/587 - Database Implementation @ PSU
 ### Authors:
 * Geoff Maggi
 * Alexander Goddard
